@@ -1,8 +1,9 @@
 import unittest
-from binascii import unhexlify
-from bdv import messages
-from bdv import entities
+from binascii import unhexlify, hexlify
 from datetime import datetime
+
+from bdv import entities
+from bdv import messages
 
 
 class TestMessages(unittest.TestCase):
@@ -31,14 +32,23 @@ class TestMessages(unittest.TestCase):
         verack = messages.NetworkMessage(b'verack', b'')
         self.assertEqual(unhexlify("f9beb4d976657261636b000000000000000000005df6e0e2"), verack.serialize())
 
-    @unittest.skip
     def test_serialize_version_message(self):
-        version = 70015 #4 bytes
-        services = 1024 #8 bytes
-        timestamp = datetime(2018, 7, 6) #to unix timestamp to 8 bytes
-        to_address = entities.NetworkAddress(services, '10.0.0.1', 8333)
-        from_address = entities.NetworkAddress(services, '10.0.0.1', 8333)
-        # random nonce 8 bytes
+        version = 60002
+        services = 1
+        timestamp = datetime(2012, 12, 18, 19, 12, 33)
+        to_address = entities.NetworkAddress(services, '0.0.0.0', 0)
+        from_address = entities.NetworkAddress(services, '0.0.0.0', 0)
+        nonce = b'\x3B\x2E\xB3\x5D\x8C\xE6\x17\x65'
         user_agent = entities.VariableLengthString(b'/Satoshi:0.7.2/')
-        last_block_received = 0 # 4 bytes
-        messages.VersionMessage(version, services, timestamp, to_address, from_address, user_agent, last_block_received)
+        last_block_received = 212672
+        message = messages.VersionMessage(version, services, timestamp, to_address, from_address, nonce, user_agent,
+                                          last_block_received)
+        expected = "f9beb4d976657273696f6e0000000000" \
+                   "640000003B648D5A62ea000001000000" \
+                   "0000000011b2d0500000000001000000" \
+                   "0000000000000000000000000000ffff" \
+                   "00000000000001000000000000000000" \
+                   "0000000000000000ffff000000000000" \
+                   "3b2eb35d8ce617650f2f5361746f7368" \
+                   "693a302e372e322fc03e0300"
+        self.assertEqual(unhexlify(expected), message.serialize())

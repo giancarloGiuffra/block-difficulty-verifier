@@ -38,3 +38,27 @@ class NetworkMessage(object):
     @classmethod
     def strip_zeros(cls, command):
         return bytes([byte for byte in command if byte != 0])
+
+
+class VersionMessage(NetworkMessage):
+
+    def __init__(self, version, services, date_time, to_address, from_address, nonce, user_agent, last_block_received):
+        self.version = version
+        self.services = services
+        self.date_time = date_time
+        self.to_address = to_address
+        self.from_address = from_address
+        self.nonce = nonce
+        self.user_agent = user_agent
+        self.last_block_received = last_block_received
+        super().__init__(b'version', self.build_payload())
+
+    def build_payload(self):
+        return self.version.to_bytes(4, byteorder='little') \
+                + self.services.to_bytes(8, byteorder='little') \
+                + int(self.date_time.timestamp()).to_bytes(8, byteorder='little') \
+                + self.to_address.serialize() \
+                + self.from_address.serialize() \
+                + self.nonce \
+                + self.user_agent.serialize() \
+                + self.last_block_received.to_bytes(4, byteorder='little')
