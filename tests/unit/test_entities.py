@@ -9,9 +9,6 @@ class TestEntities(unittest.TestCase):
         address = entities.NetworkAddress(1, '10.0.0.1', 8333)
         self.assertEqual(unhexlify('010000000000000000000000000000000000ffff0a000001208d'), address.serialize())
 
-    def test_serialize_variable_length_string(self):
-        pass
-
     def test_serialize_variable_length_integer(self):
         self.assertEqual(b'\xfc', self.serialized_integer(b'\xfc'))
         self.assertEqual(b'\xfd\xff\xff', self.serialized_integer(b'\xff\xff'))
